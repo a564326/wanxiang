@@ -121,11 +121,9 @@ jobs:
           ls -la $SDK_DIR/tools/bin/
           echo "=== test wrapper ==="
           $SDK_DIR/tools/bin/sdkmanager --version 2>&1 | head -3 || echo "wrapper test failed"
-          # Also create in buildozer's linked path
-          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
-          cp $SDK_DIR/tools/bin/sdkmanager ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
-          chmod +x ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
-          echo "=== also copied to buildozer path ==="
+          # Note: buildozer path is symlinked to system SDK, so no need to copy
+          echo "=== buildozer SDK path is symlinked to system SDK ==="
+          ls -la ~/.buildozer/android/platform/android-sdk/tools/bin/ 2>/dev/null || echo "checking symlink..."
 
       - name: Build APK
         env:
