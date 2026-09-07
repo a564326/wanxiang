@@ -64,6 +64,31 @@ jobs:
             ls -la $ANDROID_HOME/licenses/ 2>/dev/null || echo "no licenses dir"
           fi
 
+      - name: Create license files directly (no interactive accept)
+        run: |
+          SDK_DIR=/usr/local/lib/android/sdk
+          mkdir -p $SDK_DIR/licenses
+          # Android SDK License - all known hashes
+          cat > $SDK_DIR/licenses/android-sdk-license << 'EOF'
+          8933bad161af4178b1185d1a37fbf41ea5269c5
+          d56f5187479451eabf01fb78af6dfcb131a6481e
+          24333f8a63b6825ea9c5514f83c2829b004d1fee
+          EOF
+          # Android SDK Preview License
+          cat > $SDK_DIR/licenses/android-sdk-preview-license << 'EOF'
+          84831b9409646a918e30573bab4c9c91346d8abd
+          EOF
+          # Google GDK License
+          cat > $SDK_DIR/licenses/google-gdk-license << 'EOF'
+          33b6a2271e9633827b50e9e2f493b2e16e1e0e9
+          EOF
+          echo "=== licenses created ==="
+          ls -la $SDK_DIR/licenses/
+          # Also create in buildozer's possible SDK location
+          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
+          cp $SDK_DIR/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ 2>/dev/null || true
+          echo "=== also copied to buildozer SDK path ==="
+
       - name: Build APK
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
@@ -73,8 +98,6 @@ jobs:
           if [ -n "$SDKMANAGER" ]; then
             export PATH=$PATH:$(dirname $SDKMANAGER):$ANDROID_HOME/platform-tools
           fi
-          # Accept licenses one more time right before build
-          yes | $SDKMANAGER --licenses || true
           buildozer android debug
 
       - name: Check build output
