@@ -43,6 +43,33 @@ jobs:
           pip install --upgrade pip
           pip install buildozer python-for-android
 
+      - name: Patch recipe URLs to use mirrors (avoid GNU/savannah 502)
+        run: |
+          # Find p4a recipes directory
+          P4A_DIR=$(python3 -c "import pythonforandroid; print(pythonforandroid.__path__[0])" 2>/dev/null || echo "")
+          echo "p4a dir: $P4A_DIR"
+          if [ -z "$P4A_DIR" ] || [ ! -d "$P4A_DIR/recipes" ]; then
+            echo "p4a recipes not found, trying alternative path..."
+            P4A_DIR=$(find /usr/local/lib/python* -name "recipes" -path "*pythonforandroid*" -type d 2>/dev/null | head -1 | xargs dirname)
+            echo "alternative p4a dir: $P4A_DIR"
+          fi
+          if [ -n "$P4A_DIR" ] && [ -d "$P4A_DIR/recipes" ]; then
+            echo "=== patching recipe URLs ==="
+            # freetype: savannah.gnu.org -> USTC mirror
+            find $P4A_DIR/recipes -name "*.py" -exec sed -i 's|download.savannah.gnu.org/releases/freetype|mirrors.ustc.edu.cn/gnu/freetype|g' {} \;
+            # generic GNU mirror
+            find $P4A_DIR/recipes -name "*.py" -exec sed -i 's|ftp.gnu.org/gnu|mirrors.ustc.edu.cn/gnu|g' {} \;
+            find $P4A_DIR/recipes -name "*.py" -exec sed -i 's|ftp.gnu.org/pub/gnu|mirrors.ustc.edu.cn/gnu|g' {} \;
+            # libpng: sourceforge -> alternative
+            find $P4A_DIR/recipes -name "*.py" -exec sed -i 's|download.sourceforge.net/project/libpng|mirrors.ustc.edu.cn/gnu/libpng|g' {} \;
+            echo "=== patched files ==="
+            grep -rl "mirrors.ustc.edu.cn" $P4A_DIR/recipes/ 2>/dev/null | head -10
+            echo "=== verify freetype URL ==="
+            grep -r "freetype" $P4A_DIR/recipes/freetype/ 2>/dev/null | grep -i "http\|url" | head -3
+          else
+            echo "WARNING: could not find p4a recipes, skipping patch"
+          fi
+
       - name: Setup Android SDK and accept ALL licenses
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
