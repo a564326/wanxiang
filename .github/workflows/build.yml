@@ -89,6 +89,21 @@ jobs:
           cp $SDK_DIR/licenses/* ~/.buildozer/android/platform/android-sdk/licenses/ 2>/dev/null || true
           echo "=== also copied to buildozer SDK path ==="
 
+      - name: Link system SDK to buildozer's expected path
+        run: |
+          # Create buildozer platform directory
+          mkdir -p ~/.buildozer/android/platform
+          # Remove existing empty/wrong SDK dir if present
+          rm -rf ~/.buildozer/android/platform/android-sdk 2>/dev/null || true
+          # Symlink system SDK (which has sdkmanager, build-tools, licenses)
+          ln -s /usr/local/lib/android/sdk ~/.buildozer/android/platform/android-sdk
+          echo "=== symlink created ==="
+          ls -la ~/.buildozer/android/platform/
+          echo "=== verify sdkmanager in linked path ==="
+          find ~/.buildozer/android/platform/android-sdk -name "sdkmanager" 2>/dev/null || echo "sdkmanager not found in linked path"
+          echo "=== verify build-tools ==="
+          ls ~/.buildozer/android/platform/android-sdk/build-tools/ 2>/dev/null || echo "no build-tools"
+
       - name: Build APK
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
