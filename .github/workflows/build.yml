@@ -28,7 +28,10 @@ jobs:
           sudo apt-get install -y \
             git zip unzip openjdk-17-jdk \
             libffi-dev libssl-dev zlib1g-dev \
-            libbz2-dev libsqlite3-dev liblzma-dev
+            libbz2-dev libsqlite3-dev liblzma-dev \
+            libjpeg-dev libpng-dev libtiff-dev \
+            libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev \
+            libmtdev-dev libpcre3-dev libglew-dev
 
       - name: Set swap space
         uses: pierotofy/set-swap-space@v1.0
@@ -129,6 +132,8 @@ jobs:
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          GRADLE_OPTS: "-Xmx4096m -XX:MaxMetaspaceSize=512m"
+          JAVA_OPTS: "-Xmx4096m"
         run: |
           SDKMANAGER=$(find /usr/local/lib/android -name "sdkmanager" -type f 2>/dev/null | head -1)
           if [ -n "$SDKMANAGER" ]; then

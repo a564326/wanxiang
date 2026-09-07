@@ -27,12 +27,13 @@ orientation = portrait
 fullscreen = 0
 
 # Python for android requirements (MUST be in [app] section!)
-requirements = python3,kivy==2.3.1,pillow
+# Remove pinned version to let p4a choose compatible one
+requirements = python3,kivy,pillow
 
 [buildozer]
 
 # (int) Log level (0 = minimal, 1 = normal, 2 = verbose)
-log_level = 1
+log_level = 2
 
 # (str) Android SDK path (use system pre-installed SDK)
 android.sdk_path = /usr/local/lib/android/sdk
@@ -40,8 +41,8 @@ android.sdk_path = /usr/local/lib/android/sdk
 # (str) Android NDK directory
 android.ndk = 28c
 
-# (bool) Android x86 support
-android.archs = arm64-v8a, armeabi-v7a
+# (bool) Android archs - single arch to save memory and time
+android.archs = arm64-v8a
 
 # (int) Android API
 android.api = 33
