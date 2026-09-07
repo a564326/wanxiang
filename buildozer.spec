@@ -31,8 +31,11 @@ fullscreen = 0
 # (int) Log level (0 = minimal, 1 = normal, 2 = verbose)
 log_level = 1
 
+# (str) Android SDK path (use system pre-installed SDK)
+android.sdk_path = /usr/local/lib/android/sdk
+
 # (str) Android NDK directory
-android.ndk = 26b
+android.ndk = 28c
 
 # (bool) Android x86 support
 android.archs = arm64-v8a, armeabi-v7a
