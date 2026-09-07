@@ -26,6 +26,9 @@ orientation = portrait
 # (bool) Show status bar
 fullscreen = 0
 
+# Python for android requirements (MUST be in [app] section!)
+requirements = python3,kivy==2.3.1,pillow
+
 [buildozer]
 
 # (int) Log level (0 = minimal, 1 = normal, 2 = verbose)
@@ -41,9 +44,9 @@ android.ndk = 28c
 android.archs = arm64-v8a, armeabi-v7a
 
 # (int) Android API
-android.api = 34
-android.minapi = 21
-android.targetapi = 34
+android.api = 33
+android.minapi = 24
+android.targetapi = 33
 
 # (str) Android SDK build tools
 android.build_tools = 34.0.0
@@ -53,9 +56,6 @@ android.accept_sdk_license = True
 
 # (str) Gradle dependency resolution
 android.gradle_dependencies = androidx.appcompat:appcompat:1.6.1
-
-# Python for android requirements
-requirements = python3,kivy==2.3.1,pillow
 
 # (str) Extra Java compile options
 android.add_compile_options = -source 8 -target 8
