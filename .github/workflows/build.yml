@@ -104,6 +104,29 @@ jobs:
           echo "=== verify build-tools ==="
           ls ~/.buildozer/android/platform/android-sdk/build-tools/ 2>/dev/null || echo "no build-tools"
 
+      - name: Create sdkmanager wrapper at old path (tools/bin)
+        run: |
+          SDK_DIR=/usr/local/lib/android/sdk
+          # Find actual sdkmanager
+          REAL_SDKMANAGER=$(find $SDK_DIR -name "sdkmanager" -type f 2>/dev/null | head -1)
+          echo "real sdkmanager: $REAL_SDKMANAGER"
+          # Create old-style path that buildozer expects
+          mkdir -p $SDK_DIR/tools/bin
+          cat > $SDK_DIR/tools/bin/sdkmanager << EOF
+          #!/bin/bash
+          exec $REAL_SDKMANAGER "\$@"
+          EOF
+          chmod +x $SDK_DIR/tools/bin/sdkmanager
+          echo "=== wrapper created ==="
+          ls -la $SDK_DIR/tools/bin/
+          echo "=== test wrapper ==="
+          $SDK_DIR/tools/bin/sdkmanager --version 2>&1 | head -3 || echo "wrapper test failed"
+          # Also create in buildozer's linked path
+          mkdir -p ~/.buildozer/android/platform/android-sdk/tools/bin
+          cp $SDK_DIR/tools/bin/sdkmanager ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+          chmod +x ~/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager
+          echo "=== also copied to buildozer path ==="
+
       - name: Build APK
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
