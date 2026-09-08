@@ -153,6 +153,31 @@ jobs:
           echo "=== buildozer SDK path is symlinked to system SDK ==="
           ls -la ~/.buildozer/android/platform/android-sdk/tools/bin/ 2>/dev/null || echo "checking symlink..."
 
+      - name: Fetch prebuilt recipes (offline tarballs)
+        run: |
+          python3 fetch_recipes.py
+          echo "=== prebuilt contents ==="
+          ls -la prebuilt/ 2>/dev/null || echo "no prebuilt dir"
+
+      - name: Seed prebuilt recipes into p4a packages cache
+        run: |
+          # p4a packages cache dir (single arch arm64-v8a)
+          P4A_PACKAGES=$HOME/.buildozer/android/platform/build-arm64-v8a/packages
+          mkdir -p $P4A_PACKAGES
+          # Copy each recipe tarball to its recipe subdir
+          if [ -d "prebuilt" ]; then
+            for f in prebuilt/*.tar.gz; do
+              if [ -f "$f" ]; then
+                recipe_name=$(basename "$f" .tar.gz | sed 's/-[0-9].*//')
+                mkdir -p "$P4A_PACKAGES/$recipe_name"
+                cp "$f" "$P4A_PACKAGES/$recipe_name/"
+                echo "seeded: $recipe_name/$(basename $f)"
+              fi
+            done
+          fi
+          echo "=== p4a packages cache ==="
+          find $P4A_PACKAGES -type f 2>/dev/null || echo "empty"
+
       - name: Build APK
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
