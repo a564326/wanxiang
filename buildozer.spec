@@ -11,7 +11,7 @@ package.domain = com.wanxiang.tianbang
 
 # (str) Source files to include
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,json,md
+source.include_exts = py,png,jpg,jpeg,json,md,ttf,otf
 source.exclude_exts = spec,sh,bat
 
 # (list) Application version

@@ -1,6 +1,36 @@
 # -*- coding: utf-8 -*-
 """万象词条录 - 主界面（Kivy）"""
 import os
+
+# ========== 中文字体注册（必须在所有 kivy import 之前） ==========
+from kivy.core.text import LabelBase
+from kivy.config import Config
+
+# 字体候选列表：项目字体优先，系统字体兜底
+FONT_CANDIDATES = [
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "fonts", "simhei.ttf"),
+    r"C:\Windows\Fonts\simhei.ttf",
+    r"C:\Windows\Fonts\msyh.ttc",
+    "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+    "/system/fonts/NotoSansCJK-Regular.ttc",
+]
+
+_registered = False
+for _fp in FONT_CANDIDATES:
+    if os.path.exists(_fp):
+        try:
+            LabelBase.register(name="CJK", fn_regular=_fp)
+            Config.set("kivy", "default_font", ["CJK", _fp])
+            print(f"[字体] 已注册中文字体: {_fp}")
+            _registered = True
+            break
+        except Exception as e:
+            print(f"[字体] 注册失败 {_fp}: {e}")
+
+if not _registered:
+    print("[字体] 警告：未找到中文字体，中文可能显示为方块")
+# ========== 字体注册结束 ==========
+
 import random
 from kivy.app import App
 from kivy.uix.floatlayout import FloatLayout
