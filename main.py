@@ -29,6 +29,29 @@ for _fp in FONT_CANDIDATES:
 
 if not _registered:
     print("[字体] 警告：未找到中文字体，中文可能显示为方块")
+else:
+    # 方法1: 直接修改类属性默认值（最可靠）
+    from kivy.uix.label import Label as _KivyLabel
+    from kivy.uix.button import Button as _KivyButton
+    from kivy.properties import StringProperty
+
+    _KivyLabel.font_name = StringProperty('CJK')
+    _KivyButton.font_name = StringProperty('CJK')
+
+    # 方法2: monkey patch __init__ 双重保险
+    _orig_label_init = _KivyLabel.__init__
+    def _patched_label_init(self, **kwargs):
+        kwargs.setdefault("font_name", "CJK")
+        _orig_label_init(self, **kwargs)
+    _KivyLabel.__init__ = _patched_label_init
+
+    _orig_button_init = _KivyButton.__init__
+    def _patched_button_init(self, **kwargs):
+        kwargs.setdefault("font_name", "CJK")
+        _orig_button_init(self, **kwargs)
+    _KivyButton.__init__ = _patched_button_init
+
+    print("[字体] 已设置所有 Label/Button 默认使用 CJK 字体（双重保险）")
 # ========== 字体注册结束 ==========
 
 import random
@@ -309,20 +332,20 @@ class WanxiangApp(App):
         return self.screen
 
     def show_main(self):
-        self.screen = MainScreen(self)
-        Window.clear()
+        Window.children.clear()
+        Window.add_widget(MainScreen(self))
 
     def show_gacha(self):
-        self.screen = GachaScreen(self)
-        Window.clear()
+        Window.children.clear()
+        Window.add_widget(GachaScreen(self))
 
     def show_inventory(self):
-        self.screen = InventoryScreen(self)
-        Window.clear()
+        Window.children.clear()
+        Window.add_widget(InventoryScreen(self))
 
     def show_realm(self):
-        self.screen = RealmScreen(self)
-        Window.clear()
+        Window.children.clear()
+        Window.add_widget(RealmScreen(self))
 
     def show_celestial(self):
         self.show_toast("天外之象：尚无彩词条凝聚")

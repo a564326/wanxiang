@@ -159,24 +159,26 @@ jobs:
           echo "=== prebuilt contents ==="
           ls -la prebuilt/ 2>/dev/null || echo "no prebuilt dir"
 
-      - name: Seed prebuilt recipes into p4a packages cache
+      - name: Patch p4a recipes to use local tarballs (bypass network entirely)
         run: |
-          # p4a packages cache dir (single arch arm64-v8a)
-          P4A_PACKAGES=$HOME/.buildozer/android/platform/build-arm64-v8a/packages
-          mkdir -p $P4A_PACKAGES
-          # Copy each recipe tarball to its recipe subdir
-          if [ -d "prebuilt" ]; then
-            for f in prebuilt/*.tar.gz; do
-              if [ -f "$f" ]; then
-                recipe_name=$(basename "$f" .tar.gz | sed 's/-[0-9].*//')
-                mkdir -p "$P4A_PACKAGES/$recipe_name"
-                cp "$f" "$P4A_PACKAGES/$recipe_name/"
-                echo "seeded: $recipe_name/$(basename $f)"
-              fi
-            done
+          P4A_DIR=$(python3 -c "import pythonforandroid; print(pythonforandroid.__path__[0])")
+          echo "p4a dir: $P4A_DIR"
+          # Patch freetype recipe to use local file
+          FREETYPE_RECIPE=$(find $P4A_DIR/recipes/freetype -name "*.py" | head -1)
+          if [ -n "$FREETYPE_RECIPE" ] && [ -f "prebuilt/freetype-2.14.1.tar.gz" ]; then
+            LOCAL_PATH=$(realpath prebuilt/freetype-2.14.1.tar.gz)
+            echo "Patching $FREETYPE_RECIPE to use $LOCAL_PATH"
+            # Replace any http URL with local file path
+            sed -i "s|https\?://[^'\"]*freetype[^'\"]*\.tar\.gz|file://$LOCAL_PATH|g" "$FREETYPE_RECIPE"
+            echo "=== patched freetype recipe ==="
+            grep -i "url\|file://" "$FREETYPE_RECIPE" | head -5
+          else
+            echo "WARNING: freetype recipe or tarball not found"
           fi
-          echo "=== p4a packages cache ==="
-          find $P4A_PACKAGES -type f 2>/dev/null || echo "empty"
+          # Also patch any other recipes that might have GNU/savannah URLs
+          find $P4A_DIR/recipes -name "*.py" -exec sed -i 's|download.savannah.gnu.org|mirrors.ustc.edu.cn|g' {} \;
+          find $P4A_DIR/recipes -name "*.py" -exec sed -i 's|ftp.gnu.org/gnu|mirrors.ustc.edu.cn/gnu|g' {} \;
+          echo "=== all recipes patched ==="
 
       - name: Build APK
         env:
